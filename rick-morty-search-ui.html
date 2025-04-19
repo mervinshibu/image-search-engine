@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rick and Morty Image Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="rick-element">Wubba Lubba Dub Dub!</div>
+  <div class="rick-element">Oh Geez!</div>
+
+  <header>
+    <div class="container">
+      <div class="portal-icon"></div>
+      <h1>Rick and Morty Image Portal</h1>
+      <p class="subtitle">Search the multiverse for Rick and Morty images</p>
+    </div>
+  </header>
+  
+  <div class="container">
+    <form class="search-form portal-border" id="searchForm" action="/search" method="GET">
+      <div class="form-group">
+        <label for="query">Interdimensional Query</label>
+        <input type="text" id="query" name="query" placeholder="Search across dimensions C-137 and beyond..." required>
+      </div>
+      
+      <div class="form-group">
+        <label>Choose Your Dimension Hopper</label>
+        <div class="model-selector">
+          <div class="model-option">
+            <input type="radio" id="tfidf" name="model" value="tfidf" checked>
+            <label for="tfidf">TF-IDF Portal Gun</label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="bm25" name="model" value="bm25">
+            <label for="bm25">BM25 Meeseeks Box</label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="lm" name="model" value="lm">
+            <label for="lm">Language Model Microverse</label>
+          </div>
+        </div>
+      </div>
+      
+      <button type="submit" class="search-btn">Open Portal</button>
+    </form>
+    
+    <div class="results-container portal-border" id="results">
+      <div class="results-header">
+        <div class="results-count">Showing 0 results</div>
+        <div class="results-model">Dimension: TF-IDF Portal Gun</div>
+      </div>
+      
+      <div class="image-grid" id="imageGrid">
+        <!-- Results will be populated here -->
+        <div class="no-results">
+          <div class="no-results-icon">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <p>No interdimensional images found... yet</p>
+          <p>Try searching the multiverse above</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('searchForm');
+      const resultsContainer = document.getElementById('results');
+      const imageGrid = document.getElementById('imageGrid');
+      const resultsCount = document.querySelector('.results-count');
+      const resultsModel = document.querySelector('.results-model');
+      
+      // Check if there are URL parameters for a search
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('query');
+      const model = urlParams.get('model');
+      
+      if (query) {
+        document.getElementById('query').value = query;
+        if (model) {
+          document.getElementById(model).checked = true;
+        }
+        
+        // In a real application, this would be replaced with actual data
+        // from your Flask backend after form submission
+        if (window.location.search) {
+          // This is just for demonstration - in reality this would come from your Flask app
+          const mockResults = [
+            {
+              id: 1,
+              title: 'Rick in the Garage',
+              image_url: '/api/placeholder/250/200',
+              score: 0.95
+            },
+            {
+              id: 2,
+              title: 'Morty Smith Portrait',
+              image_url: '/api/placeholder/250/200',
+              score: 0.87
+            },
+            {
+              id: 3,
+              title: 'Summer vs. Alien Bugs',
+              image_url: '/api/placeholder/250/200',
+              score: 0.82
+            },
+            {
+              id: 4,
+              title: 'Pickle Rick!',
+              image_url: '/api/placeholder/250/200',
+              score: 0.78
+            },
+            {
+              id: 5,
+              title: 'Beth and Jerry Fighting',
+              image_url: '/api/placeholder/250/200',
+              score: 0.76
+            },
+            {
+              id: 6,
+              title: 'Mr. Meeseeks',
+              image_url: '/api/placeholder/250/200',
+              score: 0.72
+            }
+          ];
+          
+          displayResults(mockResults, model || 'tfidf');
+        }
+      }
+      
+      // Function to display search results
+      function displayResults(results, modelName) {
+        // Clear previous results
+        imageGrid.innerHTML = '';
+        
+        // Update results header
+        resultsCount.textContent = `Showing ${results.length} results`;
+        
+        const modelLabels = {
+          'tfidf': 'TF-IDF Portal Gun',
+          'bm25': 'BM25 Meeseeks Box',
+          'lm': 'Language Model Microverse'
+        };
+        resultsModel.textContent = `Dimension: ${modelLabels[modelName] || modelName}`;
+        
+        if (results.length === 0) {
+          imageGrid.innerHTML = `
+            <div class="no-results">
+              <div class="no-results-icon">
+                <i class="fas fa-satellite"></i>
+              </div>
+              <p>No results found for "${document.getElementById('query').value}"</p>
+              <p>Try searching another dimension</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Create and append result cards
+        results.forEach(result => {
+          const card = document.createElement('div');
+          card.className = 'image-card';
+          card.innerHTML = `
+            <div class="portal-border">
+              <div class="image-container">
+                <img src="${result.image_url}" alt="${result.title}">
+              </div>
+              <div class="image-info">
+                <div class="image-title">${result.title}</div>
+                <span class="image-score">Score: ${result.score.toFixed(2)}</span>
+              </div>
+            </div>
+          `;
+          imageGrid.appendChild(card);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

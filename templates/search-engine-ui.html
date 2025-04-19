@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rick & Morty Image Search</title>
+  <!-- Link to CSS file within the static folder -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Rick & Morty Image Search Engine</h1>
+      <p class="subtitle">Search for images using advanced information retrieval models</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Ensure form action points to the correct Flask route and uses GET -->
+    <form class="search-form" id="searchForm" action="{{ url_for('search') }}" method="GET">
+      <div class="form-group">
+        <label for="query">Search Query</label>
+        <!-- Pre-fill the query input if a search was performed -->
+        <input type="text" id="query" name="query" placeholder="Enter your search query..." required value="{{ query | default('', true) }}">
+      </div>
+
+      <div class="form-group">
+        <label>Select Search Model</label>
+        <div class="model-selector">
+          <!-- Check the correct radio button based on the selected_model variable -->
+          <div class="model-option">
+            <input type="radio" id="vsm" name="model" value="vsm" {% if selected_model == 'vsm' %}checked{% endif %}>
+            <label for="vsm">TF-IDF (VSM)</label> <!-- Changed label slightly -->
+          </div>
+          <div class="model-option">
+            <input type="radio" id="bm25" name="model" value="bm25" {% if selected_model == 'bm25' %}checked{% endif %}>
+            <label for="bm25">BM25</label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="lm_dirichlet" name="model" value="lm_dirichlet" {% if selected_model == 'lm_dirichlet' %}checked{% endif %}>
+            <label for="lm_dirichlet">Language Model</label> <!-- Changed value and label -->
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="search-btn">Search Images</button>
+    </form>
+
+    <!-- Conditionally display results container only if a search was performed -->
+    {% if search_performed %}
+      <div class="results-container" id="results">
+        <div class="results-header">
+          <!-- Display actual results count and model used -->
+          <div class="results-count">Showing {{ results|length }} results</div>
+          <div class="results-model">Model: {{ model_display_name }}</div>
+        </div>
+
+        <div class="image-grid" id="imageGrid">
+          <!-- Check if there are any results -->
+          {% if results %}
+            <!-- Loop through the results passed from Flask -->
+            {% for result in results %}
+              <div class="image-card">
+                <!-- Link the card to the source page -->
+                <a href="{{ result.source_page }}" target="_blank" title="View Source Page">
+                  <div class="image-container">
+                    <!-- Use the actual image URL and alt text -->
+                    <img src="{{ result.image_url }}" alt="{{ result.alt_text | default('Search result image', true) }}" loading="lazy" onerror="this.style.display='none'"> <!-- Basic error handling for broken images -->
+                  </div>
+                </a>
+                <div class="image-info">
+                   <!-- Optionally display source page title or URL -->
+                  <div class="image-title">Source: {{ result.source_page.split('/')[-1].replace('_', ' ') }}</div>
+                   <!-- Display the score -->
+                  <span class="image-score">Score: {{ "%.4f"|format(result.score) }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- Display message if no results were found for the query -->
+            <div class="no-results">
+              <p>No results found for "{{ query }}" using the {{ model_display_name }} model.</p>
+              <p>Try a different search query or model.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <!-- Initial state before any search is performed -->
+       <div class="results-container" id="results">
+         <div class="image-grid" id="imageGrid">
+           <div class="no-results">
+             <p>Enter a query and select a model to start searching.</p>
+           </div>
+         </div>
+       </div>
+    {% endif %}
+  </div>
+
+  <!-- Remove the old script tag with mock data -->
+
+</body>
+</html>

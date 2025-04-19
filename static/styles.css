@@ -1,0 +1,245 @@
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --secondary: #64748b;
+    --light: #f8fafc;
+    --dark: #1e293b;
+    --success: #10b981;
+    --radius: 8px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background-color: #f1f5f9;
+    color: var(--dark);
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+header {
+    background-color: white;
+    box-shadow: var(--shadow);
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+}
+
+header .container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--secondary);
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-form {
+    background-color: white;
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: border-color 0.15s ease-in-out;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.model-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.model-option {
+    flex: 1;
+    min-width: 120px;
+}
+
+.model-option input[type="radio"] {
+    display: none;
+}
+
+.model-option label {
+    display: block;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.model-option input[type="radio"]:checked + label {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.search-btn {
+    display: inline-block;
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 1rem;
+}
+
+.search-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.results-container {
+    background-color: white;
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.results-count {
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.results-model {
+    color: var(--secondary);
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.image-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f1f5f9;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.image-card:hover .image-container img {
+    transform: scale(1.05);
+}
+
+.image-info {
+    padding: 1rem;
+    background-color: white;
+}
+
+.image-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-score {
+    display: inline-block;
+    background-color: #ecfdf5;
+    color: var(--success);
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--secondary);
+}
+
+.no-results p {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    }
+    
+    .image-container {
+    height: 150px;
+    }
+    
+    .image-info {
+    padding: 0.75rem;
+    }
+}
