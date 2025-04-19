@@ -9,16 +9,14 @@ import re # Using regex for slightly cleaner URL joining
 # --- Configuration ---
 START_URLS = [
     'https://rickandmorty.fandom.com/wiki/Category:Characters',
-    # 'https://rickandmorty.fandom.com/wiki/Special:Categories', # This might lead too broadly, start without it
     'https://rickandmorty.fandom.com/wiki/Category:Episodes',
-    'https://rickandmorty.fandom.com/wiki/Category:Locations' # Adding locations for variety
+    'https://rickandmorty.fandom.com/wiki/Category:Locations'
 ]
 BASE_URL = 'https://rickandmorty.fandom.com'
-# BE POLITE: Include a descriptive User-Agent
 HEADERS = {'User-Agent': 'MyUniAssignmentCrawler/1.0 (Learning project; contact: your_email@example.com)'}
 SAVE_DIR = 'fandom_image_data' # Directory to save metadata
-TARGET_IMAGE_COUNT = 1000     # Target number of images
-DELAY_SECONDS = 4            # Politeness delay between requests (DO NOT MAKE < 2)
+TARGET_IMAGE_COUNT = 1500
+DELAY_SECONDS = 2
 
 # --- Global Variables ---
 visited_urls = set()
@@ -75,6 +73,7 @@ def parse_page(html_content, page_url):
     """
     Parses HTML to find image data (if it's an article page)
     and links to follow (articles or other categories).
+    Extracts context from title, alt text, caption, and FIRST FIVE valid paragraphs.
     """
     images_found = []
     links_to_follow = set() # Use a set to automatically handle duplicates within page
@@ -85,12 +84,14 @@ def parse_page(html_content, page_url):
     infobox = soup.find('aside', class_='portable-infobox')
     article_image_url = None
     alt_text = ""
-    context_parts = []
+    context_parts = [] # Initialize list to store parts of the context
 
+    # Add Page Title to context
     page_title_tag = soup.find('h1', id='firstHeading')
     page_title = page_title_tag.get_text(strip=True) if page_title_tag else "Untitled Page"
-    context_parts.append(page_title) # Start context with the page title
+    context_parts.append(page_title)
 
+    # Extract Image URL, Alt Text, and Caption from Infobox
     if infobox:
         figure_tag = infobox.find('figure')
         img_tag = None
@@ -98,43 +99,41 @@ def parse_page(html_content, page_url):
             img_tag = figure_tag.find('img')
             caption_tag = figure_tag.find('figcaption')
             if caption_tag:
-                context_parts.append(caption_tag.get_text(strip=True))
-        else: # Fallback if no figure tag
+                context_parts.append(caption_tag.get_text(strip=True)) # Add caption text
+        else:
              img_tag = infobox.find('img')
 
         if img_tag:
-            img_src = img_tag.get('src') or img_tag.get('data-src') # Some images load lazily
+            img_src = img_tag.get('src') or img_tag.get('data-src')
             cleaned_url = clean_image_url(img_src)
-
-            # Basic filter: Check if it looks like a valid image URL from Fandom CDN
             if cleaned_url and 'static.wikia.nocookie.net' in cleaned_url:
-                 # Add more filtering here if needed (e.g., based on URL parts, dimensions if available)
-                 article_image_url = urllib.parse.urljoin(BASE_URL, cleaned_url) # Ensure absolute
+                 article_image_url = urllib.parse.urljoin(BASE_URL, cleaned_url)
                  alt_text = img_tag.get('alt', '')
                  if alt_text:
-                     context_parts.append(alt_text)
+                     context_parts.append(alt_text) # Add alt text
 
-
-    # Get intro text from main content area for more context
-    content_body = soup.find('div', class_='mw-parser-output') # Main content area in MediaWiki
+    # Get text from the first FIVE valid paragraphs in the main content area
+    content_body = soup.find('div', class_='mw-parser-output')
     if content_body:
-        first_p = content_body.find('p', recursive=False) # Find first paragraph directly inside
-        if first_p:
-            # Avoid grabbing navboxes or tables sometimes put in <p> tags
-            if not first_p.find(['table', 'div', 'navbox']):
-                 intro_text = first_p.get_text(strip=True)
-                 # Limit length of intro text
-                 context_parts.append(intro_text[:300] + ('...' if len(intro_text) > 300 else ''))
+        # Find all direct child paragraph tags, limit to first 5
+        paragraphs = content_body.find_all('p', recursive=False)[:5]
+        for p_tag in paragraphs:
+            # Filter out paragraphs that are likely just containers for other things
+            if not p_tag.find(['table', 'div', 'aside', 'navbox'], recursive=False):
+                p_text = p_tag.get_text(strip=True)
+                # Add the paragraph text if it's not empty
+                if p_text:
+                    context_parts.append(p_text) # Append the full paragraph text
 
-
-    # If we found a primary image for the article, store it
+    # If we found a primary image for the article, store it with the combined context
     if article_image_url:
-        final_context = ' '.join(filter(None, context_parts)) # Join non-empty context strings
+        # Join all collected context parts with a space
+        final_context = ' '.join(filter(None, context_parts)) # filter(None, ...) removes empty strings if any part was empty
         images_found.append({
             'image_url': article_image_url,
             'source_page': page_url,
-            'alt_text': alt_text,
-            'context': final_context.strip() # Remove leading/trailing whitespace
+            'alt_text': alt_text, # Keep alt_text separate if needed, but it's also in context
+            'context': final_context.strip()
         })
         print(f"  Found image: {article_image_url}")
 
@@ -143,7 +142,7 @@ def parse_page(html_content, page_url):
     # Look in main content area and potentially category listings
     content_area = soup.find('div', id='mw-content-text') # Broader content area
     if not content_area:
-         content_area = soup.body # Fallback if specific ID not found
+         content_area = soup.body
 
     if content_area:
         for link_tag in content_area.find_all('a', href=True):
