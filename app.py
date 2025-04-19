@@ -115,10 +115,10 @@ def search():
     results = []
     formatted_results = []
     model_display_name = {
-        'vsm': 'TF-IDF (VSM)', # Use 'vsm' to match your SearchEngine methods
-        'bm25': 'BM25',
-        'lm_dirichlet': 'Language Model'
-    }.get(model, 'Unknown')
+        'vsm': 'TF-IDF Portal Gun', # Matches new HTML labels
+        'bm25': 'BM25 Meeseeks Box', # Matches new HTML labels
+        'lm_dirichlet': 'Language Model Microverse' # Matches new HTML labels
+    }.get(model, 'Unknown Dimension') # Default themed name
 
     search_performed = bool(query) # Check if a query was actually submitted
 
@@ -159,12 +159,12 @@ def search():
 
     # Render the same HTML template, passing necessary data
     return render_template(
-        'search-engine-ui.html',
-        query=query,                # Pass the query back to pre-fill the input
-        selected_model=model,       # Pass the selected model back to check the radio button
-        results=formatted_results,  # Pass the list of formatted result dictionaries
-        model_display_name=model_display_name, # Pass the pretty name for the model
-        search_performed=search_performed # Flag to indicate if a search was done
+        'rick-morty-search-ui.html', # Use the new HTML file name
+        query=query,
+        selected_model=model,
+        results=formatted_results,
+        model_display_name=model_display_name,
+        search_performed=search_performed
     )
 
 

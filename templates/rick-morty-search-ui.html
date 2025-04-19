@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rick and Morty Image Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Link CSS using url_for -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="rick-element">Wubba Lubba Dub Dub!</div>
+  <div class="rick-element">Oh Geez!</div>
+
+  <header>
+    <div class="container">
+      <div class="portal-icon"></div>
+      <h1>Rick and Morty Image Portal</h1>
+      <p class="subtitle">Search the multiverse for Rick and Morty images</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Form action points to Flask route -->
+    <form class="search-form portal-border" id="searchForm" action="{{ url_for('search') }}" method="GET">
+      <div class="form-group">
+        <label for="query">Interdimensional Query</label>
+        <!-- Pre-fill query value -->
+        <input type="text" id="query" name="query" placeholder="Search across dimensions C-137 and beyond..." required value="{{ query | default('', true) }}">
+      </div>
+
+      <div class="form-group">
+        <label>Choose Your Dimension Hopper</label>
+        <div class="model-selector">
+           <!-- Check correct radio button based on selected_model -->
+          <div class="model-option">
+             <!-- VALUE MUST MATCH what app.py expects for VSM -->
+            <input type="radio" id="vsm" name="model" value="vsm" {% if selected_model == 'vsm' %}checked{% endif %}>
+            <label for="vsm">TF-IDF Portal Gun</label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="bm25" name="model" value="bm25" {% if selected_model == 'bm25' %}checked{% endif %}>
+            <label for="bm25">BM25 Meeseeks Box</label>
+          </div>
+          <div class="model-option">
+             <!-- VALUE MUST MATCH what app.py expects for LM -->
+            <input type="radio" id="lm_dirichlet" name="model" value="lm_dirichlet" {% if selected_model == 'lm_dirichlet' %}checked{% endif %}>
+             <!-- Ensure label 'for' matches the updated id -->
+            <label for="lm_dirichlet">Language Model Microverse</label>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="search-btn">Open Portal</button>
+    </form>
+
+    <!-- Conditionally display results container -->
+    {% if search_performed %}
+      <div class="results-container portal-border" id="results">
+        <div class="results-header">
+          <!-- Use actual results count and model name -->
+          <div class="results-count">Showing {{ results|length }} results</div>
+          <div class="results-model">Dimension: {{ model_display_name }}</div>
+        </div>
+
+        <div class="image-grid" id="imageGrid">
+           <!-- Check if results exist -->
+          {% if results %}
+            <!-- Loop through results from Flask -->
+            {% for result in results %}
+              <div class="image-card">
+                <!-- Use the themed portal border div -->
+                <div class="portal-border">
+                   <!-- Link to source page -->
+                   <a href="{{ result.source_page }}" target="_blank" title="View Source Dimension">
+                      <div class="image-container">
+                         <!-- Use actual image url and alt text -->
+                        <img src="{{ result.image_url }}" alt="{{ result.alt_text | default('Image from another dimension', true) }}" loading="lazy" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#000';"> <!-- Added onerror style -->
+                      </div>
+                   </a>
+                  <div class="image-info">
+                    <!-- Derive title, display score -->
+                    <div class="image-title">Source: {{ result.source_page.split('/')[-1].replace('_', ' ') }}</div>
+                    <span class="image-score">Score: {{ "%.4f"|format(result.score) }}</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+             <!-- No results message -->
+            <div class="no-results">
+              <div class="no-results-icon">
+                <i class="fas fa-satellite"></i> <!-- Using satellite icon -->
+              </div>
+              <p>No interdimensional images found for "{{ query }}" in the {{ model_display_name }} dimension.</p>
+              <p>Maybe try schwifting through another dimension?</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+       <!-- Initial state before search -->
+      <div class="results-container portal-border" id="results">
+         <div class="image-grid" id="imageGrid">
+           <div class="no-results">
+             <div class="no-results-icon">
+               <i class="fas fa-rocket"></i> <!-- Using rocket icon -->
+             </div>
+             <p>Power up the portal gun!</p>
+             <p>Enter a query to search the multiverse.</p>
+           </div>
+         </div>
+       </div>
+    {% endif %}
+  </div>
+</body>
+</html>
